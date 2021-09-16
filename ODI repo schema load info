@@ -1,0 +1,19 @@
+select snp_lpi_run.start_date,
+       SNP_LP_INST.load_plan_name,
+       snp_lpi_run.context_code,
+       snp_lpi_run.end_date,
+       substr(numtodsinterval(duration, 'SECOND'), 12, 8) as duration,
+       case status
+          when 'W' then '<span style="color:red">Waiting</span>'
+          when 'R' then '<span style="color:red">Running</span>'
+          when 'E' then '<span style="color:red">Error</span>'
+          when 'D' then '<span style="color:green">Done</span>'
+          when 'M' then '<span style="color:red">Warning</span>'
+          when 'A' then 'Already done in a previous run'
+       end status_msg
+  from DEV_BIA_ODIREPO.snp_lpi_run
+  join DEV_BIA_ODIREPO.SNP_LP_INST 
+  on snp_lpi_run.I_LP_INST = SNP_LP_INST.I_LP_INST
+ where start_date >= trunc(sysdate)
+ order by start_date
+ ;
