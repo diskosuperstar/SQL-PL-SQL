@@ -1,3 +1,4 @@
+#Widespread use
 select snp_lpi_run.start_date,
        SNP_LP_INST.load_plan_name,
        snp_lpi_run.context_code,
@@ -17,3 +18,51 @@ select snp_lpi_run.start_date,
  where start_date >= trunc(sysdate)
  order by start_date
  ;
+
+
+#CUSTOM 
+SELECT snp_lpi_run.start_date,
+ ( CASE SNP_LP_INST.load_plan_name 
+    WHEN 'PROJECT FUSION DAILY REFRESH_22_20190315_073423'
+    THEN 'DAILY REFRESH'
+    WHEN 'PROJECT FUSION TOW REFRESH_162_20180724_033543'
+    THEN 'TOW REFRESH'
+    WHEN 'PIONEER_CORNER_STONE_LOAD_823_20210303_225339'
+    THEN 'CONER STONE LOAD'
+    WHEN 'PROJECT FUSION FREQUENT REFRESH_23_20200327_113249'
+    THEN 'FREQUENT REFRESH' 
+    ELSE
+    SNP_LP_INST.load_plan_name
+  END
+  ||' '
+  || 
+  CASE snp_lpi_run.CONTEXT_CODE
+    WHEN 'GLOBAL'
+    THEN 'PRD_DW'
+    WHEN 'PNR_CUSTOM_CXT'
+    THEN 'PNR_CUSTOM_DW'
+  END) as LOAD_PLAN_NAME ,
+  snp_lpi_run.context_code,
+  snp_lpi_run.end_date,
+  TO_CHAR( start_date, 'HH:MI:SS' )                  AS Start_time,
+  TO_CHAR( end_date, 'HH:MI:SS' )                    AS End_time,
+  SUBSTR(numtodsinterval(duration, 'SECOND'), 12, 8) AS duration,
+  CASE status
+    WHEN 'W'
+    THEN '<span style="color:red">Waiting</span>'
+    WHEN 'R'
+    THEN '<span style="color:red">Running</span>'
+    WHEN 'E'
+    THEN '<span style="color:red">Error</span>'
+    WHEN 'D'
+    THEN '<span style="color:green">Done</span>'
+    WHEN 'M'
+    THEN '<span style="color:red">Warning</span>'
+    WHEN 'A'
+    THEN 'Already done in a previous run'
+  END status_msg
+FROM PRD_BIA_ODIREPO.snp_lpi_run
+JOIN PRD_BIA_ODIREPO.SNP_LP_INST
+ON snp_lpi_run.I_LP_INST = SNP_LP_INST.I_LP_INST
+WHERE start_date        >= TRUNC(sysdate)
+ORDER BY start_date DESC ;
