@@ -1,0 +1,19 @@
+--All loads and their duration
+
+select SNP_LPI_RUN.I_LP_INST, SNP_LPI_RUN.START_DATE, SNP_LPI_RUN.END_DATE, SNP_LPI_RUN.DURATION, status
+from SNP_LPI_RUN
+join SNP_LP_INST on SNP_LPI_RUN.I_LP_INST = SNP_LP_INST.I_LP_INST
+where SNP_LP_INST.load_Plan_name = 'PROJECT FUSION DAILY REFRESH_22_20190315_073423'
+and SNP_LPI_RUN.CONTEXT_CODE = 'GLOBAL'
+and trunc(start_date) >= trunc(sysdate - 50)
+order by SNP_LPI_RUN.START_DATE desc;
+
+--grouped by start time and sum of the duration
+select SNP_LPI_RUN.I_LP_INST, trunc(SNP_LPI_RUN.START_DATE), trunc(sum(SNP_LPI_RUN.DURATION)/3600, 2)
+from SNP_LPI_RUN
+join SNP_LP_INST on SNP_LPI_RUN.I_LP_INST = SNP_LP_INST.I_LP_INST
+where SNP_LP_INST.load_Plan_name = 'PROJECT FUSION DAILY REFRESH_22_20190315_073423'
+and SNP_LPI_RUN.CONTEXT_CODE = 'GLOBAL'
+and trunc(start_date) >= trunc(sysdate - 50)
+group by SNP_LPI_RUN.I_LP_INST,trunc(SNP_LPI_RUN.START_DATE)
+order by trunc(SNP_LPI_RUN.START_DATE) desc;
