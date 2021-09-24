@@ -17,3 +17,12 @@ and SNP_LPI_RUN.CONTEXT_CODE = 'GLOBAL'
 and trunc(start_date) >= trunc(sysdate - 50)
 group by SNP_LPI_RUN.I_LP_INST,trunc(SNP_LPI_RUN.START_DATE)
 order by trunc(SNP_LPI_RUN.START_DATE) desc;
+
+-- average duration
+select Load_plan_name, SNP_LPI_RUN.context_code, trunc(avg(SNP_LPI_RUN.DURATION)/3600,2),trunc(avg(SNP_LPI_RUN.DURATION)/3600,2)*60
+from SNP_LPI_RUN
+join SNP_LP_INST on SNP_LPI_RUN.I_LP_INST = SNP_LP_INST.I_LP_INST
+--where SNP_LP_INST.load_Plan_name = 'PROJECT FUSION DAILY REFRESH_22_20190315_073423'
+--and SNP_LPI_RUN.CONTEXT_CODE = 'GLOBAL'
+group by Load_plan_name,SNP_LPI_RUN.context_code
+order by load_Plan_name;
