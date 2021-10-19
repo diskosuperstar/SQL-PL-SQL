@@ -1,0 +1,6 @@
+select
+    p.pop_name interface_name,
+    t.table_name target_table,
+    m.cod_mod model_code
+from snp_pop p inner join snp_table t on p.i_table = t.i_table
+    inner join snp_model m on t.i_mod = m.i_mod;
