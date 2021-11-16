@@ -1,28 +1,22 @@
---All loads and their duration
+--ODI REPO duration for a specific scenario
 
-select SNP_LPI_RUN.I_LP_INST, SNP_LPI_RUN.START_DATE, SNP_LPI_RUN.END_DATE, SNP_LPI_RUN.DURATION, status
-from SNP_LPI_RUN
-join SNP_LP_INST on SNP_LPI_RUN.I_LP_INST = SNP_LP_INST.I_LP_INST
-where SNP_LP_INST.load_Plan_name = 'PROJECT FUSION DAILY REFRESH_22_20190315_073423'
-and SNP_LPI_RUN.CONTEXT_CODE = 'GLOBAL'
-and trunc(start_date) >= trunc(sysdate - 50)
-order by SNP_LPI_RUN.START_DATE desc;
-
---grouped by start time and sum of the duration
-select SNP_LPI_RUN.I_LP_INST, trunc(SNP_LPI_RUN.START_DATE), trunc(sum(SNP_LPI_RUN.DURATION)/3600, 2)
-from SNP_LPI_RUN
-join SNP_LP_INST on SNP_LPI_RUN.I_LP_INST = SNP_LP_INST.I_LP_INST
-where SNP_LP_INST.load_Plan_name = 'PROJECT FUSION DAILY REFRESH_22_20190315_073423'
-and SNP_LPI_RUN.CONTEXT_CODE = 'GLOBAL'
-and trunc(start_date) >= trunc(sysdate - 50)
-group by SNP_LPI_RUN.I_LP_INST,trunc(SNP_LPI_RUN.START_DATE)
-order by trunc(SNP_LPI_RUN.START_DATE) desc;
-
--- average duration
-select Load_plan_name, SNP_LPI_RUN.context_code, trunc(avg(SNP_LPI_RUN.DURATION)/3600,2),trunc(avg(SNP_LPI_RUN.DURATION)/3600,2)*60
-from SNP_LPI_RUN
-join SNP_LP_INST on SNP_LPI_RUN.I_LP_INST = SNP_LP_INST.I_LP_INST
---where SNP_LP_INST.load_Plan_name = 'PROJECT FUSION DAILY REFRESH_22_20190315_073423'
---and SNP_LPI_RUN.CONTEXT_CODE = 'GLOBAL'
-group by Load_plan_name,SNP_LPI_RUN.context_code
-order by load_Plan_name;
+SELECT
+    sess_name,
+    sess_end,
+    to_char(trunc(sess_dur / 3600), 'FM9900')
+    || ':'
+    || to_char(trunc(mod(sess_dur, 3600) / 60), 'FM00')
+    || ':'
+    || to_char(mod(sess_dur, 60), 'FM00') as duration,
+    nb_row,
+    nb_ins,
+    nb_upd,
+    nb_del
+FROM
+    snp_session
+WHERE
+        sess_name = 'MODIFIED_SDE_ORA_APINVOICEDISTRIBUTIONFACT' --remove this for all sessions
+    AND context_code = 'GLOBAL' -- change depending on the context
+ORDER BY
+    sess_end DESC;
+    
